@@ -1,0 +1,57 @@
+{
+  "name": "@omer-x/svg-viewport",
+  "version": "0.0.0",
+  "description": "Provides a simple React component for displaying SVG content with zooming and panning capabilities",
+  "keywords": [
+    "react",
+    "svg",
+    "component",
+    "zooming",
+    "panning",
+    "viewport",
+    "scalable-vector-graphics"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omermecitoglu/svg-viewport.git"
+  },
+  "bugs": {
+    "url": "https://github.com/omermecitoglu/svg-viewport/issues"
+  },
+  "homepage": "https://github.com/omermecitoglu/svg-viewport#readme",
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist"
+  },
+  "author": {
+    "name": "Omer Mecitoglu",
+    "email": "omer.mecitoglu@gmail.com",
+    "url": "https://omermecitoglu.github.io"
+  },
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "check-unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport='SvgViewport'",
+    "prebuild": "npm run check-unused-exports && tsc",
+    "build": "rollup --config"
+  },
+  "dependencies": {
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@omer-x/eslint-config": "^1.0.5",
+    "@rollup/plugin-alias": "^5.1.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/react": "^18.2.55",
+    "eslint": "^8.56.0",
+    "rollup": "^4.12.0",
+    "rollup-plugin-dts": "^6.1.0",
+    "ts-unused-exports": "^10.0.1",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3"
+  }
+}
