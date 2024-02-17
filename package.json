@@ -1,6 +1,6 @@
 {
   "name": "@omer-x/svg-viewport",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Provides a simple React component for displaying SVG content with zooming and panning capabilities",
   "keywords": [
     "react",
@@ -21,8 +21,7 @@
   "homepage": "https://github.com/omermecitoglu/svg-viewport#readme",
   "private": false,
   "publishConfig": {
-    "access": "public",
-    "directory": "dist"
+    "access": "public"
   },
   "author": {
     "name": "Omer Mecitoglu",
@@ -31,8 +30,8 @@
   },
   "license": "MIT",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./index.js",
+  "types": "./index.d.ts",
   "scripts": {
     "check-unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport='SvgViewport'",
     "prebuild": "npm run check-unused-exports && tsc",
