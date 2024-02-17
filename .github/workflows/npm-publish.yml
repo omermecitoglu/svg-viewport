@@ -15,8 +15,6 @@ jobs:
       - run: npm ci
       # - run: npm test
       - run: npm run build
-      - run: cp package.json ./dist
-      - run: cd ./dist
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
