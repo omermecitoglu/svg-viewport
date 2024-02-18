@@ -1,6 +1,6 @@
 {
   "name": "@omer-x/svg-viewport",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Provides a simple React component for displaying SVG content with zooming and panning capabilities",
   "keywords": [
     "react",
