@@ -1,20 +1,24 @@
 "use client";
 import React, { type Dispatch, type ReactNode, type SetStateAction, useCallback, useEffect, useRef, useState } from "react";
+import { adjustWithZoom, focusTo, transform } from "~/core/matrix";
+import { usePolyfillState } from "~/hooks/polyfill-state";
 import type { Point } from "~/types/point";
 import type { ViewportTransform } from "~/types/viewport";
-import { adjustWithZoom, transform } from "../core/matrix";
+
+export type { ViewportTransform };
+export { focusTo };
 
 export type SvgViewportProps = {
   width: number,
   height: number,
-  pannable: boolean,
-  zoomable: boolean,
-  minZoom: number,
-  maxZoom: number,
-  panning: boolean,
-  setPanning: (status: boolean) => void,
-  transformation: ViewportTransform | null,
-  setTransformation: Dispatch<SetStateAction<ViewportTransform | null>>,
+  pannable?: boolean,
+  zoomable?: boolean,
+  minZoom?: number,
+  maxZoom?: number,
+  panning?: boolean,
+  setPanning?: Dispatch<SetStateAction<boolean>>,
+  transformation?: ViewportTransform | null,
+  setTransformation?: Dispatch<SetStateAction<ViewportTransform | null>>,
   className?: string,
   children: ReactNode,
 };
@@ -22,23 +26,33 @@ export type SvgViewportProps = {
 const SvgViewport = ({
   width,
   height,
-  pannable,
-  zoomable,
-  minZoom,
-  maxZoom,
-  panning,
+  pannable = false,
+  zoomable = false,
+  minZoom = 0.5,
+  maxZoom = 2,
+  panning = false,
   setPanning,
-  transformation,
+  transformation = null,
   setTransformation,
   className,
   children,
 }: SvgViewportProps) => {
-  const [grabbing, setGrabbing] = useState(false);
   const pointer = useRef<Point>({ x: 0, y: 0 });
+  const [grabbing, setGrabbing] = useState(false);
+  const [activeTransformation, activeSetTransformation] = usePolyfillState(transformation, setTransformation);
+  const [activePanning, setActivePanning] = usePolyfillState(panning, setPanning);
 
   const stopGrabbing = () => {
     setGrabbing(false);
   };
+
+  useEffect(() => {
+    if (setTransformation) return;
+    activeSetTransformation({
+      zoom: 1,
+      matrix: focusTo(new DOMMatrix(), { x: 0, y: 0 }, width, height, 1),
+    });
+  }, [setTransformation]);
 
   // panning
 
@@ -48,29 +62,29 @@ const SvgViewport = ({
         x: e.clientX,
         y: e.clientY,
       };
-      setPanning(true);
+      setActivePanning(true);
     }
     setGrabbing(true);
   };
 
   const move = useCallback((e: MouseEvent) => {
-    if (panning && transformation) {
-      const x = (e.clientX - pointer.current.x) / transformation.zoom;
-      const y = (e.clientY - pointer.current.y) / transformation.zoom;
+    if (activePanning && activeTransformation) {
+      const x = (e.clientX - pointer.current.x) / activeTransformation.zoom;
+      const y = (e.clientY - pointer.current.y) / activeTransformation.zoom;
       pointer.current = {
         x: e.clientX,
         y: e.clientY,
       };
-      setTransformation(t => (t ? { ...t, matrix: t.matrix.translate(x, y) } : t));
+      activeSetTransformation(t => (t ? { ...t, matrix: t.matrix.translate(x, y) } : t));
     }
-  }, [panning, transformation]);
+  }, [activePanning, activeTransformation]);
 
   const up = useCallback(() => {
-    setPanning(false);
+    setActivePanning(false);
   }, []);
 
   useEffect(() => {
-    if (panning) {
+    if (activePanning) {
       document.addEventListener("mousemove", move);
       document.addEventListener("mouseup", up);
     }
@@ -78,7 +92,7 @@ const SvgViewport = ({
       document.removeEventListener("mousemove", move);
       document.removeEventListener("mouseup", up);
     };
-  }, [panning]);
+  }, [activePanning]);
 
   // zooming
 
@@ -87,7 +101,7 @@ const SvgViewport = ({
     const eventTarget = e.currentTarget;
     const eventClientX = e.clientX;
     const eventClientY = e.clientY;
-    setTransformation(t => {
+    activeSetTransformation(t => {
       if (t && t.zoom * scale > minZoom && t.zoom * scale < maxZoom) {
         return {
           ...t,
@@ -113,8 +127,8 @@ const SvgViewport = ({
       className={className}
       style={{ cursor }}
     >
-      <g transform={transformation ? transform(transformation.matrix) : undefined}>
-        {transformation && children}
+      <g transform={transform(activeTransformation?.matrix)}>
+        {activeTransformation && children}
       </g>
     </svg>
   );
