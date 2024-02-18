@@ -1,3 +1,4 @@
+"use client";
 import React, { type Dispatch, type ReactNode, type SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import type { Point } from "~/types/point";
 import type { ViewportTransform } from "~/types/viewport";

@@ -1,7 +1,7 @@
 import path from "path";
 import alias from "@rollup/plugin-alias";
-import terser from "@rollup/plugin-terser";
 import typescript from "@rollup/plugin-typescript";
+import banner2 from "rollup-plugin-banner2";
 import dts from "rollup-plugin-dts";
 
 const config = [
@@ -9,8 +9,7 @@ const config = [
     input: "build/components/SvgViewport.js",
     output: {
       file: "dist/index.js",
-      format: "cjs",
-      sourcemap: true,
+      format: "esm",
     },
     external: ["react"],
     plugins: [
@@ -20,7 +19,7 @@ const config = [
           { find: /^~/, replacement: path.resolve(process.cwd() + "/src") },
         ],
       }),
-      terser(),
+      banner2(() => '"use client";\n'),
     ],
   }, {
     input: "build/components/SvgViewport.d.ts",

@@ -23,6 +23,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "dist/"
+  ],
   "author": {
     "name": "Omer Mecitoglu",
     "email": "omer.mecitoglu@gmail.com",
@@ -43,11 +46,11 @@
   "devDependencies": {
     "@omer-x/eslint-config": "^1.0.5",
     "@rollup/plugin-alias": "^5.1.0",
-    "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/react": "^18.2.55",
     "eslint": "^8.56.0",
     "rollup": "^4.12.0",
+    "rollup-plugin-banner2": "^1.2.2",
     "rollup-plugin-dts": "^6.1.0",
     "ts-unused-exports": "^10.0.1",
     "tslib": "^2.6.2",
