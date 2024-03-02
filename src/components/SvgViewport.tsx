@@ -1,6 +1,7 @@
 "use client";
 import React, { type Dispatch, type ReactNode, type SetStateAction, useCallback, useEffect, useRef, useState } from "react";
-import { adjustWithZoom, focusTo, transform } from "~/core/matrix";
+import getFocusedMatrix, { type FocusPoint } from "~/core/initial-focus";
+import { adjustWithZoom, transform } from "~/core/matrix";
 import { usePolyfillState } from "~/hooks/polyfill-state";
 import type { Point } from "~/types/point";
 import type { ViewportTransform } from "~/types/viewport";
@@ -16,6 +17,7 @@ type SvgViewportProps = {
   setPanning?: Dispatch<SetStateAction<boolean>>,
   transformation?: ViewportTransform | null,
   setTransformation?: Dispatch<SetStateAction<ViewportTransform | null>>,
+  initialFocusPoint?: FocusPoint,
   className?: string,
   children: ReactNode,
 };
@@ -31,6 +33,7 @@ const SvgViewport = ({
   setPanning,
   transformation = null,
   setTransformation,
+  initialFocusPoint = "center",
   className,
   children,
 }: SvgViewportProps) => {
@@ -47,7 +50,7 @@ const SvgViewport = ({
     if (setTransformation) return;
     activeSetTransformation({
       zoom: 1,
-      matrix: focusTo(new DOMMatrix(), { x: 0, y: 0 }, width, height, 1),
+      matrix: getFocusedMatrix(initialFocusPoint, width, height),
     });
   }, [setTransformation]);
 
