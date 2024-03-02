@@ -36,7 +36,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "check-unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport='SvgViewport'",
+    "check-unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport='src/index'",
     "prebuild": "npm run check-unused-exports && tsc",
     "build": "rollup --config"
   },

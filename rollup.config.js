@@ -6,7 +6,7 @@ import dts from "rollup-plugin-dts";
 
 const config = [
   {
-    input: "build/components/SvgViewport.js",
+    input: "build/index.js",
     output: {
       file: "dist/index.js",
       format: "esm",
@@ -22,7 +22,7 @@ const config = [
       banner2(() => '"use client";\n'),
     ],
   }, {
-    input: "build/components/SvgViewport.d.ts",
+    input: "build/index.d.ts",
     output: {
       file: "dist/index.d.ts",
       format: "es",

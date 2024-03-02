@@ -5,10 +5,7 @@ import { usePolyfillState } from "~/hooks/polyfill-state";
 import type { Point } from "~/types/point";
 import type { ViewportTransform } from "~/types/viewport";
 
-export type { ViewportTransform };
-export { focusTo };
-
-export type SvgViewportProps = {
+type SvgViewportProps = {
   width: number,
   height: number,
   pannable?: boolean,
