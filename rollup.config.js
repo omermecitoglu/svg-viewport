@@ -22,7 +22,7 @@ const config = [
       banner2(() => '"use client";\n'),
     ],
   }, {
-    input: "build/index.d.ts",
+    input: "build/components/SvgViewport.d.ts",
     output: {
       file: "dist/index.d.ts",
       format: "es",

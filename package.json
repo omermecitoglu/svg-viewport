@@ -1,6 +1,6 @@
 {
   "name": "@omer-x/svg-viewport",
-  "version": "0.2.0",
+  "version": "0.3.1",
   "description": "Provides a simple React component for displaying SVG content with zooming and panning capabilities",
   "keywords": [
     "react",
@@ -38,6 +38,7 @@
   "scripts": {
     "check-unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport='src/index'",
     "prebuild": "npm run check-unused-exports && tsc",
+    "postbuild": "rimraf dist/build",
     "build": "rollup --config"
   },
   "dependencies": {
