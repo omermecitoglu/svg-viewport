@@ -46,11 +46,11 @@
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@omer-x/eslint-config": "^1.0.5",
+    "@omer-x/eslint-config": "^2.0.2",
     "@rollup/plugin-alias": "^5.1.0",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/react": "^18.2.55",
-    "eslint": "^8.56.0",
+    "eslint": "^9.11.1",
     "rollup": "^4.12.0",
     "rollup-plugin-banner2": "^1.2.2",
     "rollup-plugin-dts": "^6.1.0",
