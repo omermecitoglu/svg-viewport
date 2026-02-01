@@ -1,11 +1,11 @@
-import React, { type Dispatch, type ReactNode, type SetStateAction, useCallback, useEffect, useRef, useState } from "react";
+import React, { ComponentProps, type Dispatch, type ReactNode, type SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import getFocusedMatrix, { type FocusPoint } from "../core/initial-focus";
 import { adjustWithZoom, transform } from "../core/matrix";
 import { usePolyfillState } from "../hooks/polyfill-state";
 import type { Point } from "../types/point";
 import type { ViewportTransform } from "../types/viewport";
 
-type SvgViewportProps = {
+type SvgViewportProps = ComponentProps<"svg"> & {
   width: number,
   height: number,
   pannable?: boolean,
@@ -17,8 +17,6 @@ type SvgViewportProps = {
   transformation?: ViewportTransform | null,
   setTransformation?: Dispatch<SetStateAction<ViewportTransform | null>>,
   initialFocusPoint?: FocusPoint,
-  className?: string,
-  children: ReactNode,
 };
 
 const SvgViewport = ({
@@ -33,8 +31,9 @@ const SvgViewport = ({
   transformation = null,
   setTransformation,
   initialFocusPoint = "center",
-  className,
+  style,
   children,
+  ...otherProps
 }: SvgViewportProps) => {
   const pointer = useRef<Point>({ x: 0, y: 0 });
   const [grabbing, setGrabbing] = useState(false);
@@ -123,8 +122,8 @@ const SvgViewport = ({
       onMouseLeave={pannable ? stopGrabbing : undefined}
       onWheel={zoomable ? adjustZoom : undefined}
       onContextMenu={e => e.preventDefault()}
-      className={className}
-      style={{ cursor }}
+      style={{ ...style, cursor }}
+      {...otherProps}
     >
       <g transform={transform(activeTransformation?.matrix)}>
         {activeTransformation && children}
