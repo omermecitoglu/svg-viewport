@@ -1,8 +1,8 @@
-import { describe, expect, it } from "@jest/globals";
+import { describe, expect, it } from "vitest";
 import SvgViewport from "./components/SvgViewport";
 
 describe("SvgViewport Component", () => {
-  it("should ...", () => {
-    expect(SvgViewport).not.toBeNull();
+  it("should be a function", () => {
+    expect(typeof SvgViewport).toBe("function");
   });
 });
