@@ -1,4 +1,4 @@
-import React, { ComponentProps, type Dispatch, type ReactNode, type SetStateAction, useCallback, useEffect, useRef, useState } from "react";
+import React, { type ComponentProps, type Dispatch, type SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import getFocusedMatrix, { type FocusPoint } from "../core/initial-focus";
 import { adjustWithZoom, transform } from "../core/matrix";
 import { usePolyfillState } from "../hooks/polyfill-state";
