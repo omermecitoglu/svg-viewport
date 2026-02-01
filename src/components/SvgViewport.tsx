@@ -1,9 +1,9 @@
 import React, { type Dispatch, type ReactNode, type SetStateAction, useCallback, useEffect, useRef, useState } from "react";
-import getFocusedMatrix, { type FocusPoint } from "~/core/initial-focus";
-import { adjustWithZoom, transform } from "~/core/matrix";
-import { usePolyfillState } from "~/hooks/polyfill-state";
-import type { Point } from "~/types/point";
-import type { ViewportTransform } from "~/types/viewport";
+import getFocusedMatrix, { type FocusPoint } from "../core/initial-focus";
+import { adjustWithZoom, transform } from "../core/matrix";
+import { usePolyfillState } from "../hooks/polyfill-state";
+import type { Point } from "../types/point";
+import type { ViewportTransform } from "../types/viewport";
 
 type SvgViewportProps = {
   width: number,

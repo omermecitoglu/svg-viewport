@@ -1,4 +1,4 @@
 "use client";
-import SvgViewport from "~/components/SvgViewport";
+import SvgViewport from "./components/SvgViewport";
 
 export default SvgViewport;
