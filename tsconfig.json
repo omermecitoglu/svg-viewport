@@ -1,33 +1,23 @@
 {
   "compilerOptions": {
-    "outDir": "build",
-    "target": "es6",
-    "lib": ["dom", "ESNext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": false,
     "esModuleInterop": true,
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "target": "ESNext",
+    "allowJs": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "declaration": true,
-    "sourceMap": true,
-    "jsx": "react",
-    "incremental": false,
-    "plugins": [
-    ],
+    "moduleDetection": "force",
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
+    "noEmit": true,
+    "jsx": "react-jsx",
     "paths": {
       "~/*": ["./src/*"]
     },
   },
   "include": [
-    "jest.config.ts",
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "**/*.ts",
   ],
-  "exclude": [
-    "node_modules",
-  ],
+  "exclude": ["node_modules", "dist"]
 }

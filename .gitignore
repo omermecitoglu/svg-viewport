@@ -1,4 +1,6 @@
 /node_modules
 /coverage
-/.rollup.cache
-/build
+/dist
+
+# macOS
+.DS_Store

@@ -37,26 +37,20 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "test": "jest",
-    "prebuild": "tsc",
-    "postbuild": "rimraf dist/build",
-    "build": "rollup --config"
+    "dev": "tsup --watch",
+    "build": "tsup"
   },
   "dependencies": {
     "react": "^19.2.4"
   },
   "devDependencies": {
     "@omer-x/eslint-config": "^2.2.6",
-    "@rollup/plugin-alias": "^6.0.0",
-    "@rollup/plugin-typescript": "^12.3.0",
     "@types/react": "^19.2.10",
     "eslint": "^9.39.2",
-    "rollup": "^4.57.1",
-    "rollup-plugin-banner2": "^1.3.1",
-    "rollup-plugin-dts": "^6.3.0",
     "semantic-release": "^25.0.3",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "tslib": "^2.8.1",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   }
 }
