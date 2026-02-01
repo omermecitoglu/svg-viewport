@@ -5,20 +5,59 @@ import { usePolyfillState } from "../hooks/polyfill-state";
 import type { Point } from "../types/point";
 import type { ViewportTransform } from "../types/viewport";
 
+/**
+ * Props for the SvgViewport component.
+ */
 type SvgViewportProps = ComponentProps<"svg"> & {
+  /**
+   * Width of the SVG viewport.
+   */
   width: number,
+  /**
+   * Height of the SVG viewport.
+   */
   height: number,
+  /**
+   * Enable or disable panning functionality.
+   */
   pannable?: boolean,
+  /**
+   * Enable or disable zooming functionality.
+   */
   zoomable?: boolean,
+  /**
+   * Minimum zoom level.
+   */
   minZoom?: number,
+  /**
+   * Maximum zoom level.
+   */
   maxZoom?: number,
+  /**
+   * Indicates if panning is currently active.
+   */
   panning?: boolean,
+  /**
+   * Setter for the panning state.
+   */
   setPanning?: Dispatch<SetStateAction<boolean>>,
+  /**
+   * Current transformation state.
+   */
   transformation?: ViewportTransform | null,
+  /**
+   * Setter for the transformation state.
+   */
   setTransformation?: Dispatch<SetStateAction<ViewportTransform | null>>,
+  /**
+   * Initial focus point of the viewport.
+   */
   initialFocusPoint?: FocusPoint,
 };
 
+/**
+ * SVG Viewport component that supports panning and zooming.
+ */
 const SvgViewport = ({
   width,
   height,
