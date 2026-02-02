@@ -65,58 +65,64 @@ const SvgViewport = ({
 }: SvgViewportProps) => {
   const isControlled = externalTransformation !== undefined;
 
-  const pointer = useRef<Point>({ x: 0, y: 0 });
-  const [grabbing, setGrabbing] = useState(false);
-  const [internalTransformation, setInternalTransformation] = useState<ViewportTransformation | null>(null);
-  const [isPanning, setIsPanning] = useState(false);
+  const [internalTransformation, setInternalTransformation] = useState<ViewportTransformation | null>(() => {
+    if (isControlled) return null;
+    return {
+      zoom: 1,
+      matrix: getFocusedMatrix(initialFocusPoint, width, height),
+    };
+  });
 
   const transformation = isControlled ? externalTransformation : internalTransformation;
 
-  const setTransformation = (value: ViewportTransformation) => {
+  const transformationRef = useRef(transformation);
+  useEffect(() => {
+    transformationRef.current = transformation;
+  }, [transformation]);
+
+  const pointer = useRef<Point>({ x: 0, y: 0 });
+  const [grabbing, setGrabbing] = useState(false);
+  const [isPanning, setIsPanning] = useState(false);
+
+  const setTransformation = useCallback((value: ViewportTransformation) => {
     if (!isControlled) {
       setInternalTransformation(value);
     }
     onTransformationChange?.(value);
-  };
+  }, [isControlled, onTransformationChange]);
 
   const stopGrabbing = () => {
     setGrabbing(false);
   };
 
-  useEffect(() => {
-    setTransformation({
-      zoom: 1,
-      matrix: getFocusedMatrix(initialFocusPoint, width, height),
-    });
-  }, []);
-
-  // panning
+  // --- PANNING ---
 
   const down = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (e.button === 0) {
-      pointer.current = {
-        x: e.clientX,
-        y: e.clientY,
-      };
-      setIsPanning(true);
-    }
+    if (e.button !== 0) return;
+    pointer.current = { x: e.clientX, y: e.clientY };
+    setIsPanning(true);
     setGrabbing(true);
   };
 
   const move = useCallback((e: MouseEvent) => {
-    if (isPanning && transformation) {
-      const x = (e.clientX - pointer.current.x) / transformation.zoom;
-      const y = (e.clientY - pointer.current.y) / transformation.zoom;
-      pointer.current = {
-        x: e.clientX,
-        y: e.clientY,
-      };
-      setTransformation({ ...transformation, matrix: transformation.matrix.translate(x, y) });
+    const currentTrans = transformationRef.current;
+
+    if (currentTrans) {
+      const x = (e.clientX - pointer.current.x) / currentTrans.zoom;
+      const y = (e.clientY - pointer.current.y) / currentTrans.zoom;
+
+      pointer.current = { x: e.clientX, y: e.clientY };
+
+      setTransformation({
+        ...currentTrans,
+        matrix: currentTrans.matrix.translate(x, y),
+      });
     }
-  }, [isPanning, transformation]);
+  }, [setTransformation]);
 
   const up = useCallback(() => {
     setIsPanning(false);
+    setGrabbing(false);
   }, []);
 
   useEffect(() => {
@@ -128,24 +134,29 @@ const SvgViewport = ({
       document.removeEventListener("mousemove", move);
       document.removeEventListener("mouseup", up);
     };
-  }, [isPanning]);
+  }, [isPanning, move, up]);
 
-  // zooming
+
+  // --- ZOOMING ---
 
   const adjustZoom = (e: React.WheelEvent<SVGSVGElement>) => {
+    if (!zoomable) return;
+
+    e.preventDefault();
+
     const scale = e.deltaY < 0 ? 1.25 : 0.8;
     const eventTarget = e.currentTarget;
-    const eventClientX = e.clientX;
-    const eventClientY = e.clientY;
+    const { clientX, clientY } = e;
+
     if (transformation && transformation.zoom * scale > minZoom && transformation.zoom * scale < maxZoom) {
       setTransformation({
         zoom: transformation.zoom * scale,
-        matrix: adjustWithZoom(transformation.matrix, scale, eventTarget, eventClientX, eventClientY),
+        matrix: adjustWithZoom(transformation.matrix, scale, eventTarget, clientX, clientY),
       });
     }
   };
 
-  const cursor = pannable ? ((grabbing || isPanning) ? "grabbing" : "grab") : "auto";
+  const cursor = pannable ? (grabbing ? "grabbing" : "grab") : "auto";
 
   return (
     <svg
