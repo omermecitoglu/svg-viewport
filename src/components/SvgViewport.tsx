@@ -2,7 +2,7 @@ import React, { type ComponentProps, useCallback, useEffect, useRef, useState } 
 import getFocusedMatrix, { type FocusPoint } from "../core/initial-focus";
 import { adjustWithZoom, transform } from "../core/matrix";
 import type { Point } from "../types/point";
-import type { ViewportTransform } from "../types/viewport";
+import type { ViewportTransformation } from "../types/viewport";
 
 /**
  * Props for the SvgViewport component.
@@ -35,11 +35,11 @@ type SvgViewportProps = ComponentProps<"svg"> & {
   /**
    * Current transformation state of the viewport.
    */
-  transformation?: ViewportTransform | null,
+  transformation?: ViewportTransformation | null,
   /**
    * Callback to update the transformation state.
    */
-  onTransformationChange?: (tranformation: ViewportTransform) => void,
+  onTransformationChange?: (tranformation: ViewportTransformation) => void,
   /**
    * Initial focus point of the viewport.
    */
@@ -67,12 +67,12 @@ const SvgViewport = ({
 
   const pointer = useRef<Point>({ x: 0, y: 0 });
   const [grabbing, setGrabbing] = useState(false);
-  const [internalTransformation, setInternalTransformation] = useState<ViewportTransform | null>(null);
+  const [internalTransformation, setInternalTransformation] = useState<ViewportTransformation | null>(null);
   const [isPanning, setIsPanning] = useState(false);
 
   const transformation = isControlled ? externalTransformation : internalTransformation;
 
-  const setTransformation = (value: ViewportTransform) => {
+  const setTransformation = (value: ViewportTransformation) => {
     if (!isControlled) {
       setInternalTransformation(value);
     }

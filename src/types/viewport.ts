@@ -1,4 +1,4 @@
-export type ViewportTransform = {
+export type ViewportTransformation = {
   zoom: number,
   matrix: DOMMatrix,
 };
