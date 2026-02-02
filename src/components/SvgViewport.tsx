@@ -33,18 +33,28 @@ type SvgViewportProps = ComponentProps<"svg"> & {
    */
   maxZoom?: number,
   /**
-   * Current transformation state of the viewport.
-   */
-  transformation?: ViewportTransformation | null,
-  /**
-   * Callback to update the transformation state.
-   */
-  onTransformationChange?: (tranformation: ViewportTransformation) => void,
-  /**
    * Initial focus point of the viewport.
    */
   initialFocusPoint?: FocusPoint,
-};
+} & ({
+  /**
+   * Current transformation state of the viewport.
+   */
+  transformation: ViewportTransformation | null,
+  /**
+   * Callback to update the transformation state.
+   */
+  onTransformationChange?: React.Dispatch<React.SetStateAction<ViewportTransformation | null>>,
+} | {
+  /**
+   * Current transformation state of the viewport.
+   */
+  transformation?: never,
+  /**
+   * Callback to observe the transformation state.
+   */
+  onTransformationChange?: (tranformation: ViewportTransformation) => void,
+});
 
 /**
  * SVG Viewport component that supports panning and zooming.
@@ -68,51 +78,57 @@ const SvgViewport = ({
   const pointer = useRef<Point>({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const transformation = isControlled ? externalTransformation : internalTransformation;
-  const transformationRef = useRef(transformation);
 
-  useEffect(() => {
-    transformationRef.current = transformation;
-  }, [transformation]);
-
-  useEffect(() => {
-    if (!isControlled && !internalTransformation) {
-      setInternalTransformation({
-        zoom: 1,
-        matrix: getFocusedMatrix(initialFocusPoint, width, height),
+  const setTransformation: typeof setInternalTransformation = input => {
+    if (isControlled) {
+      onTransformationChange?.(input);
+    } else {
+      setInternalTransformation(previousValue => {
+        if (typeof input === "function") {
+          const nextValue = input(previousValue);
+          if (nextValue) {
+            onTransformationChange?.(nextValue);
+          }
+          return nextValue;
+        }
+        if (input) {
+          onTransformationChange?.(input);
+        }
+        return input;
       });
     }
+  };
+
+  useEffect(() => {
+    setTransformation({
+      zoom: 1,
+      matrix: getFocusedMatrix(initialFocusPoint, width, height),
+    });
   }, []);
 
-  const setTransformation = useCallback((value: ViewportTransformation) => {
-    if (!isControlled) {
-      setInternalTransformation(value);
-    }
-    onTransformationChange?.(value);
-  }, [isControlled, onTransformationChange]);
-
-  // --- PANNING ---
+  // panning
 
   const down = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (e.button !== 0) return;
-    pointer.current = { x: e.clientX, y: e.clientY };
-    setIsPanning(true);
+    if (e.button === 0) {
+      pointer.current = {
+        x: e.clientX,
+        y: e.clientY,
+      };
+      setIsPanning(true);
+    }
   };
 
   const move = useCallback((e: MouseEvent) => {
-    const currentTrans = transformationRef.current;
-
-    if (currentTrans) {
-      const x = (e.clientX - pointer.current.x) / currentTrans.zoom;
-      const y = (e.clientY - pointer.current.y) / currentTrans.zoom;
-
-      pointer.current = { x: e.clientX, y: e.clientY };
-
-      setTransformation({
-        ...currentTrans,
-        matrix: currentTrans.matrix.translate(x, y),
-      });
+    if (isPanning && transformation) {
+      const x = (e.clientX - pointer.current.x) / transformation.zoom;
+      const y = (e.clientY - pointer.current.y) / transformation.zoom;
+      pointer.current = {
+        x: e.clientX,
+        y: e.clientY,
+      };
+      setTransformation(t => (t ? { ...t, matrix: t.matrix.translate(x, y) } : t));
     }
-  }, [setTransformation]);
+  }, [isPanning, transformation]);
 
   const up = useCallback(() => {
     setIsPanning(false);
@@ -127,26 +143,26 @@ const SvgViewport = ({
       document.removeEventListener("mousemove", move);
       document.removeEventListener("mouseup", up);
     };
-  }, [isPanning, move, up]);
+  }, [isPanning]);
 
-
-  // --- ZOOMING ---
+  // zooming
 
   const adjustZoom = (e: React.WheelEvent<SVGSVGElement>) => {
-    if (!zoomable) return;
-
     e.preventDefault();
-
     const scale = e.deltaY < 0 ? 1.25 : 0.8;
     const eventTarget = e.currentTarget;
-    const { clientX, clientY } = e;
-
-    if (transformation && transformation.zoom * scale > minZoom && transformation.zoom * scale < maxZoom) {
-      setTransformation({
-        zoom: transformation.zoom * scale,
-        matrix: adjustWithZoom(transformation.matrix, scale, eventTarget, clientX, clientY),
-      });
-    }
+    const eventClientX = e.clientX;
+    const eventClientY = e.clientY;
+    setTransformation(t => {
+      if (t && t.zoom * scale > minZoom && t.zoom * scale < maxZoom) {
+        return {
+          ...t,
+          zoom: t.zoom * scale,
+          matrix: adjustWithZoom(t.matrix, scale, eventTarget, eventClientX, eventClientY),
+        };
+      }
+      return t;
+    });
   };
 
   return (
