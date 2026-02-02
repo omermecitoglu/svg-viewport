@@ -34,14 +34,6 @@ type SvgViewportProps = ComponentProps<"svg"> & {
    */
   maxZoom?: number,
   /**
-   * Indicates if panning is currently active.
-   */
-  panning?: boolean,
-  /**
-   * Setter for the panning state.
-   */
-  setPanning?: Dispatch<SetStateAction<boolean>>,
-  /**
    * Current transformation state.
    */
   transformation?: ViewportTransform | null,
@@ -65,8 +57,6 @@ const SvgViewport = ({
   zoomable = false,
   minZoom = 0.5,
   maxZoom = 2,
-  panning = false,
-  setPanning,
   transformation = null,
   setTransformation,
   initialFocusPoint = "center",
@@ -77,7 +67,7 @@ const SvgViewport = ({
   const pointer = useRef<Point>({ x: 0, y: 0 });
   const [grabbing, setGrabbing] = useState(false);
   const [activeTransformation, activeSetTransformation] = usePolyfillState(transformation, setTransformation);
-  const [activePanning, setActivePanning] = usePolyfillState(panning, setPanning);
+  const [isPanning, setIsPanning] = useState(false);
 
   const stopGrabbing = () => {
     setGrabbing(false);
@@ -99,13 +89,13 @@ const SvgViewport = ({
         x: e.clientX,
         y: e.clientY,
       };
-      setActivePanning(true);
+      setIsPanning(true);
     }
     setGrabbing(true);
   };
 
   const move = useCallback((e: MouseEvent) => {
-    if (activePanning && activeTransformation) {
+    if (isPanning && activeTransformation) {
       const x = (e.clientX - pointer.current.x) / activeTransformation.zoom;
       const y = (e.clientY - pointer.current.y) / activeTransformation.zoom;
       pointer.current = {
@@ -114,14 +104,14 @@ const SvgViewport = ({
       };
       activeSetTransformation(t => (t ? { ...t, matrix: t.matrix.translate(x, y) } : t));
     }
-  }, [activePanning, activeTransformation]);
+  }, [isPanning, activeTransformation]);
 
   const up = useCallback(() => {
-    setActivePanning(false);
+    setIsPanning(false);
   }, []);
 
   useEffect(() => {
-    if (activePanning) {
+    if (isPanning) {
       document.addEventListener("mousemove", move);
       document.addEventListener("mouseup", up);
     }
@@ -129,7 +119,7 @@ const SvgViewport = ({
       document.removeEventListener("mousemove", move);
       document.removeEventListener("mouseup", up);
     };
-  }, [activePanning]);
+  }, [isPanning]);
 
   // zooming
 
@@ -150,7 +140,7 @@ const SvgViewport = ({
     });
   };
 
-  const cursor = pannable ? ((grabbing || panning) ? "grabbing" : "grab") : "auto";
+  const cursor = pannable ? ((grabbing || isPanning) ? "grabbing" : "grab") : "auto";
 
   return (
     <svg
