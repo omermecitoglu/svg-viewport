@@ -64,25 +64,25 @@ const SvgViewport = ({
   ...otherProps
 }: SvgViewportProps) => {
   const isControlled = externalTransformation !== undefined;
-
-  const [internalTransformation, setInternalTransformation] = useState<ViewportTransformation | null>(() => {
-    if (isControlled) return null;
-    return {
-      zoom: 1,
-      matrix: getFocusedMatrix(initialFocusPoint, width, height),
-    };
-  });
-
+  const [internalTransformation, setInternalTransformation] = useState<ViewportTransformation | null>(null);
+  const pointer = useRef<Point>({ x: 0, y: 0 });
+  const [grabbing, setGrabbing] = useState(false);
+  const [isPanning, setIsPanning] = useState(false);
   const transformation = isControlled ? externalTransformation : internalTransformation;
-
   const transformationRef = useRef(transformation);
+
   useEffect(() => {
     transformationRef.current = transformation;
   }, [transformation]);
 
-  const pointer = useRef<Point>({ x: 0, y: 0 });
-  const [grabbing, setGrabbing] = useState(false);
-  const [isPanning, setIsPanning] = useState(false);
+  useEffect(() => {
+    if (!isControlled && !internalTransformation) {
+      setInternalTransformation({
+        zoom: 1,
+        matrix: getFocusedMatrix(initialFocusPoint, width, height),
+      });
+    }
+  }, []);
 
   const setTransformation = useCallback((value: ViewportTransformation) => {
     if (!isControlled) {
