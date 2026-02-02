@@ -1,7 +1,6 @@
-import React, { type ComponentProps, type Dispatch, type SetStateAction, useCallback, useEffect, useRef, useState } from "react";
+import React, { type ComponentProps, useCallback, useEffect, useRef, useState } from "react";
 import getFocusedMatrix, { type FocusPoint } from "../core/initial-focus";
 import { adjustWithZoom, transform } from "../core/matrix";
-import { usePolyfillState } from "../hooks/polyfill-state";
 import type { Point } from "../types/point";
 import type { ViewportTransform } from "../types/viewport";
 
@@ -34,13 +33,13 @@ type SvgViewportProps = ComponentProps<"svg"> & {
    */
   maxZoom?: number,
   /**
-   * Current transformation state.
+   * Current transformation state of the viewport.
    */
   transformation?: ViewportTransform | null,
   /**
-   * Setter for the transformation state.
+   * Callback to update the transformation state.
    */
-  setTransformation?: Dispatch<SetStateAction<ViewportTransform | null>>,
+  onTransformationChange?: (tranformation: ViewportTransform) => void,
   /**
    * Initial focus point of the viewport.
    */
@@ -57,29 +56,39 @@ const SvgViewport = ({
   zoomable = false,
   minZoom = 0.5,
   maxZoom = 2,
-  transformation = null,
-  setTransformation,
+  transformation: externalTransformation,
+  onTransformationChange,
   initialFocusPoint = "center",
   style,
   children,
   ...otherProps
 }: SvgViewportProps) => {
+  const isControlled = externalTransformation !== undefined;
+
   const pointer = useRef<Point>({ x: 0, y: 0 });
   const [grabbing, setGrabbing] = useState(false);
-  const [activeTransformation, activeSetTransformation] = usePolyfillState(transformation, setTransformation);
+  const [internalTransformation, setInternalTransformation] = useState<ViewportTransform | null>(null);
   const [isPanning, setIsPanning] = useState(false);
+
+  const transformation = isControlled ? externalTransformation : internalTransformation;
+
+  const setTransformation = (value: ViewportTransform) => {
+    if (!isControlled) {
+      setInternalTransformation(value);
+    }
+    onTransformationChange?.(value);
+  };
 
   const stopGrabbing = () => {
     setGrabbing(false);
   };
 
   useEffect(() => {
-    if (setTransformation) return;
-    activeSetTransformation({
+    setTransformation({
       zoom: 1,
       matrix: getFocusedMatrix(initialFocusPoint, width, height),
     });
-  }, [setTransformation]);
+  }, []);
 
   // panning
 
@@ -95,16 +104,16 @@ const SvgViewport = ({
   };
 
   const move = useCallback((e: MouseEvent) => {
-    if (isPanning && activeTransformation) {
-      const x = (e.clientX - pointer.current.x) / activeTransformation.zoom;
-      const y = (e.clientY - pointer.current.y) / activeTransformation.zoom;
+    if (isPanning && transformation) {
+      const x = (e.clientX - pointer.current.x) / transformation.zoom;
+      const y = (e.clientY - pointer.current.y) / transformation.zoom;
       pointer.current = {
         x: e.clientX,
         y: e.clientY,
       };
-      activeSetTransformation(t => (t ? { ...t, matrix: t.matrix.translate(x, y) } : t));
+      setTransformation({ ...transformation, matrix: transformation.matrix.translate(x, y) });
     }
-  }, [isPanning, activeTransformation]);
+  }, [isPanning, transformation]);
 
   const up = useCallback(() => {
     setIsPanning(false);
@@ -128,16 +137,12 @@ const SvgViewport = ({
     const eventTarget = e.currentTarget;
     const eventClientX = e.clientX;
     const eventClientY = e.clientY;
-    activeSetTransformation(t => {
-      if (t && t.zoom * scale > minZoom && t.zoom * scale < maxZoom) {
-        return {
-          ...t,
-          zoom: t.zoom * scale,
-          matrix: adjustWithZoom(t.matrix, scale, eventTarget, eventClientX, eventClientY),
-        };
-      }
-      return t;
-    });
+    if (transformation && transformation.zoom * scale > minZoom && transformation.zoom * scale < maxZoom) {
+      setTransformation({
+        zoom: transformation.zoom * scale,
+        matrix: adjustWithZoom(transformation.matrix, scale, eventTarget, eventClientX, eventClientY),
+      });
+    }
   };
 
   const cursor = pannable ? ((grabbing || isPanning) ? "grabbing" : "grab") : "auto";
@@ -154,8 +159,8 @@ const SvgViewport = ({
       style={{ ...style, cursor }}
       {...otherProps}
     >
-      <g transform={transform(activeTransformation?.matrix)}>
-        {activeTransformation && children}
+      <g transform={transform(transformation?.matrix)}>
+        {transformation && children}
       </g>
     </svg>
   );
