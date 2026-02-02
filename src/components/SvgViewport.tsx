@@ -66,7 +66,6 @@ const SvgViewport = ({
   const isControlled = externalTransformation !== undefined;
   const [internalTransformation, setInternalTransformation] = useState<ViewportTransformation | null>(null);
   const pointer = useRef<Point>({ x: 0, y: 0 });
-  const [grabbing, setGrabbing] = useState(false);
   const [isPanning, setIsPanning] = useState(false);
   const transformation = isControlled ? externalTransformation : internalTransformation;
   const transformationRef = useRef(transformation);
@@ -91,17 +90,12 @@ const SvgViewport = ({
     onTransformationChange?.(value);
   }, [isControlled, onTransformationChange]);
 
-  const stopGrabbing = () => {
-    setGrabbing(false);
-  };
-
   // --- PANNING ---
 
   const down = (e: React.MouseEvent<SVGSVGElement>) => {
     if (e.button !== 0) return;
     pointer.current = { x: e.clientX, y: e.clientY };
     setIsPanning(true);
-    setGrabbing(true);
   };
 
   const move = useCallback((e: MouseEvent) => {
@@ -122,7 +116,6 @@ const SvgViewport = ({
 
   const up = useCallback(() => {
     setIsPanning(false);
-    setGrabbing(false);
   }, []);
 
   useEffect(() => {
@@ -156,18 +149,17 @@ const SvgViewport = ({
     }
   };
 
-  const cursor = pannable ? (grabbing ? "grabbing" : "grab") : "auto";
-
   return (
     <svg
       width={width}
       height={height}
       onMouseDown={pannable ? down : undefined}
-      onMouseUp={pannable ? stopGrabbing : undefined}
-      onMouseLeave={pannable ? stopGrabbing : undefined}
       onWheel={zoomable ? adjustZoom : undefined}
       onContextMenu={e => e.preventDefault()}
-      style={{ ...style, cursor }}
+      style={{
+        ...style,
+        cursor: pannable ? (isPanning ? "grabbing" : "grab") : "auto",
+      }}
       {...otherProps}
     >
       <g transform={transform(transformation?.matrix)}>
