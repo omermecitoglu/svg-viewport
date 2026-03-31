@@ -119,16 +119,16 @@ const SvgViewport = ({
   };
 
   const move = useCallback((e: MouseEvent) => {
-    if (isPanning && transformation) {
-      const x = (e.clientX - pointer.current.x) / transformation.zoom;
-      const y = (e.clientY - pointer.current.y) / transformation.zoom;
-      pointer.current = {
-        x: e.clientX,
-        y: e.clientY,
-      };
-      setTransformation(t => (t ? { ...t, matrix: t.matrix.translate(x, y) } : t));
-    }
-  }, [isPanning, transformation]);
+    if (!isPanning) return;
+    if (!transformation) return;
+    const x = (e.clientX - pointer.current.x) / transformation.zoom;
+    const y = (e.clientY - pointer.current.y) / transformation.zoom;
+    pointer.current = {
+      x: e.clientX,
+      y: e.clientY,
+    };
+    setTransformation(t => (t ? { ...t, matrix: t.matrix.translate(x, y) } : t));
+  }, [isPanning, transformation?.zoom]);
 
   const up = useCallback(() => {
     setIsPanning(false);
