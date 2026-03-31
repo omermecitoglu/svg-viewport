@@ -21,6 +21,15 @@ type SvgViewportProps = ComponentProps<"svg"> & {
    */
   pannable?: boolean,
   /**
+   * Optional bounds for panning. If provided, the viewport will be constrained within these limits when panning.
+   */
+  panningBounds?: {
+    left?: number,
+    top?: number,
+    right?: number,
+    bottom?: number,
+  },
+  /**
    * Enable or disable zooming functionality.
    */
   zoomable?: boolean,
@@ -63,6 +72,7 @@ const SvgViewport = ({
   width,
   height,
   pannable = false,
+  panningBounds,
   zoomable = false,
   minZoom = 0.5,
   maxZoom = 2,
@@ -99,6 +109,15 @@ const SvgViewport = ({
     }
   };
 
+  const applyBounds = (matrix: DOMMatrix, bounds: SvgViewportProps["panningBounds"], zoom: number) => {
+    if (!bounds) return matrix;
+    if (bounds.left !== undefined) matrix.e = Math.min(-bounds.left * zoom, matrix.e);
+    if (bounds.top !== undefined) matrix.f = Math.min(-bounds.top * zoom, matrix.f);
+    if (bounds.right !== undefined) matrix.e = Math.max((-bounds.right * zoom) + width, matrix.e);
+    if (bounds.bottom !== undefined) matrix.f = Math.max((-bounds.bottom * zoom) + height, matrix.f);
+    return matrix;
+  };
+
   useEffect(() => {
     setTransformation({
       zoom: 1,
@@ -127,7 +146,13 @@ const SvgViewport = ({
       x: e.clientX,
       y: e.clientY,
     };
-    setTransformation(t => (t ? { ...t, matrix: t.matrix.translate(x, y) } : t));
+    setTransformation(t => {
+      if (!t) return t;
+      return {
+        ...t,
+        matrix: applyBounds(t.matrix.translate(x, y), panningBounds, transformation.zoom),
+      };
+    });
   }, [isPanning, transformation?.zoom]);
 
   const up = useCallback(() => {
@@ -158,7 +183,7 @@ const SvgViewport = ({
         return {
           ...t,
           zoom: t.zoom * scale,
-          matrix: adjustWithZoom(t.matrix, scale, eventTarget, eventClientX, eventClientY),
+          matrix: applyBounds(adjustWithZoom(t.matrix, scale, eventTarget, eventClientX, eventClientY), panningBounds, t.zoom * scale),
         };
       }
       return t;
