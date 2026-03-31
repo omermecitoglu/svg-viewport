@@ -173,7 +173,25 @@ const SvgViewport = ({
   // zooming
 
   const adjustZoom = (e: React.WheelEvent<SVGSVGElement>) => {
-    e.preventDefault();
+    /**
+     * NOTE: e.preventDefault() is commented out due to "Passive Event Listener" violations.
+     *
+     * * THE PROBLEM:
+     * Modern browsers treat 'wheel' events as passive by default to ensure smooth
+     * page scrolling. Passive listeners disallow e.preventDefault().
+     *
+     * * WHAT WAS IT FIXING:
+     * Preventing the default scroll behavior of the browser so the page stays still while the user zooms into the SVG content.
+     *
+     * * REACT LIMITATION:
+     * React's synthetic event system (onWheel) does not currently provide a way
+     * to set { passive: false } on the event listener.
+     *
+     * * THE REAL FIX:
+     * If it becomes necessary somehow, this listener must be moved to a useEffect hook
+     * using a manual ref and `addEventListener("wheel", listener, { passive: false })`.
+     */
+    // e.preventDefault(); // was causing an error (Unable to preventDefault inside passive event listener invocation)
     const scale = e.deltaY < 0 ? 1.25 : 0.8;
     const eventTarget = e.currentTarget;
     const eventClientX = e.clientX;
