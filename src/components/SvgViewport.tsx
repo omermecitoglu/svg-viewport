@@ -1,13 +1,18 @@
-import React, { type ComponentProps, useCallback, useEffect, useRef, useState } from "react";
+import React, { type ComponentPropsWithoutRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import getFocusedMatrix, { type FocusPoint } from "../core/initial-focus";
 import { adjustWithZoom, transform } from "../core/matrix";
 import type { Point } from "../types/point";
 import type { ViewportTransformation } from "../types/viewport";
 
+export interface ViewportHandle {
+  resetTransformation: () => void,
+}
+
 /**
  * Props for the SvgViewport component.
  */
-type SvgViewportProps = ComponentProps<"svg"> & {
+type SvgViewportProps = ComponentPropsWithoutRef<"svg"> & {
+  ref?: React.RefObject<ViewportHandle | null>,
   /**
    * Width of the SVG viewport.
    */
@@ -81,6 +86,7 @@ type SvgViewportProps = ComponentProps<"svg"> & {
  * SVG Viewport component that supports panning and zooming.
  */
 const SvgViewport = ({
+  ref,
   width,
   height,
   pannable = false,
@@ -133,12 +139,20 @@ const SvgViewport = ({
     return matrix;
   };
 
-  useEffect(() => {
+  function resetTransformation() {
     const matrix = getFocusedMatrix(initialFocusPoint, width, height);
     matrix.e += -initialX;
     matrix.f += -initialY;
     setTransformation({ zoom: initialZoom, matrix });
+  }
+
+  useEffect(() => {
+    resetTransformation();
   }, []);
+
+  useImperativeHandle(ref, () => ({
+    resetTransformation,
+  }), [initialFocusPoint, width, height, initialX, initialY, initialZoom]);
 
   // panning
 
