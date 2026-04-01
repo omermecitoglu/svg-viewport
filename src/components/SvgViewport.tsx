@@ -45,6 +45,18 @@ type SvgViewportProps = ComponentProps<"svg"> & {
    * Initial focus point of the viewport.
    */
   initialFocusPoint?: FocusPoint,
+  /**
+   * Initial X coordinate for the viewport's transformation matrix (used when uncontrolled).
+   */
+  initialX?: number,
+  /**
+   * Initial Y coordinate for the viewport's transformation matrix (used when uncontrolled).
+   */
+  initialY?: number,
+  /**
+   * Initial zoom level of the viewport.
+   */
+  initialZoom?: number,
 } & ({
   /**
    * Current transformation state of the viewport.
@@ -79,6 +91,9 @@ const SvgViewport = ({
   transformation: externalTransformation,
   onTransformationChange,
   initialFocusPoint = "center",
+  initialX = 0,
+  initialY = 0,
+  initialZoom = 1,
   style,
   children,
   ...otherProps
@@ -119,10 +134,10 @@ const SvgViewport = ({
   };
 
   useEffect(() => {
-    setTransformation({
-      zoom: 1,
-      matrix: getFocusedMatrix(initialFocusPoint, width, height),
-    });
+    const matrix = getFocusedMatrix(initialFocusPoint, width, height);
+    matrix.e += -initialX;
+    matrix.f += -initialY;
+    setTransformation({ zoom: initialZoom, matrix });
   }, []);
 
   // panning
